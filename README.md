@@ -1,6 +1,6 @@
 # **A simple Expense Tracking Application**
 
-***Prequisites**:
+**Prequisites**:
 
 i. Flutter SDK, with correct Path
 
