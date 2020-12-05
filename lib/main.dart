@@ -1,5 +1,5 @@
 import 'dart:ui';
-
+import './widgets/chart.dart';
 import 'package:flutter/material.dart';
 import './widgets/txn_list.dart';
 import './widgets/new_txn.dart';
@@ -13,19 +13,22 @@ class ExpenseApp extends StatelessWidget {
     return MaterialApp(
       title: 'Expense Tracker',
       theme: ThemeData(
-          primarySwatch: Colors.green,
-          accentColor: Colors.amber,
+          primarySwatch: Colors.cyan,
+          accentColor: Colors.lightGreenAccent,
+          errorColor: Colors.indigo,
           fontFamily: 'Quicksand',
           textTheme: ThemeData.light().textTheme.copyWith(
                 title: TextStyle(
                   fontFamily: 'OpenSans',
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
+                  color: Colors.blue,
                 ),
               ),
           appBarTheme: AppBarTheme(
             textTheme: ThemeData.light().textTheme.copyWith(
                   title: TextStyle(
+                    color: Colors.black,
                     fontFamily: 'OpenSans',
                     fontSize: 25,
                     fontWeight: FontWeight.w300,
@@ -45,26 +48,21 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   ///This variable will hold a list of txns
-  final List<Txn> _userTransactions = [
-    // Txn(
-    //   id: 't1',
-    //   title: 'New Shoes',
-    //   amount: 69.99,
-    //   date: DateTime.now(),
-    // ),
-    // Txn(
-    //   id: 't2',
-    //   title: 'Weekly Groceries',
-    //   amount: 16.53,
-    //   date: DateTime.now(),
-    // ),
-  ];
+  final List<Txn> _userTransactions = [];
 
-  void _addNewTransaction(String txTitle, double txAmount) {
+//For puuting as an argument in the chart constructor at line number 114
+  List<Txn> get _recentTransactions {
+    return _userTransactions.where((tx) {
+      return tx.date.isAfter(DateTime.now().subtract(Duration(days: 7)));
+    }).toList();
+  }
+
+  void _addNewTransaction(
+      String txTitle, double txAmount, DateTime chosenDate) {
     final newTx = Txn(
       title: txTitle,
       amount: txAmount,
-      date: DateTime.now(),
+      date: chosenDate,
       id: DateTime.now().toString(),
     );
 
@@ -86,51 +84,53 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  void _deleteTransaction(String id) {
+    setState(() {
+      _userTransactions.removeWhere((tx) {
+        return tx.id == id;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 10,
+        elevation: 0.0,
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text(
-              'Expense Tracker',
-              style: TextStyle(fontFamily: 'Open Sans'),
+            Row(
+              children: [
+                Text(
+                  'Expense',
+                  style: TextStyle(fontFamily: 'Open Sans'),
+                ),
+                Text(
+                  ' Tracker',
+                  style: TextStyle(
+                      fontFamily: 'Open Sans', fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () => _startAddNewTransaction(context),
-          ),
-        ],
-        backgroundColor: Colors.purple,
+        backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
         child: Column(
-          //mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              width: double.infinity,
-              child: Card(
-                color: Colors.purple[500],
-                child: Container(
-                  width: double.infinity,
-                  child: Text('CHART'),
-                ),
-                elevation: 5,
-              ),
-            ),
-            TxnList(_userTransactions),
+            Chart(_recentTransactions),
+            TxnList(_userTransactions, _deleteTransaction),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () => _startAddNewTransaction(context),
+        backgroundColor: Colors.white,
+        elevation: 5.0,
       ),
     );
   }
