@@ -8,7 +8,7 @@ i. Flutter SDK, with correct Path
 ii. VS Code / Android Studio with Flutter and Dart plugins installed.
 
 
-iii. A working device/ and Android Emulator
+iii. A working device/ or an Android Emulator
 
 >Pardon small mistakes :>
 
