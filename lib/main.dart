@@ -1,5 +1,4 @@
 import 'dart:ui';
-//import 'package:flutter/services.dart';
 import './widgets/chart.dart';
 import 'package:flutter/material.dart';
 import './widgets/txn_list.dart';
@@ -7,11 +6,6 @@ import './widgets/new_txn.dart';
 import './models/txns.dart';
 
 void main() {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // SystemChrome.setPreferredOrientations([
-  //   DeviceOrientation.portraitUp,
-  //   DeviceOrientation.portraitDown,
-  // ]);
   runApp(ExpenseApp());
 }
 
@@ -103,6 +97,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = (mediaQuery.orientation == Orientation.landscape);
     final appBar = AppBar(
       elevation: 0.0,
       title: Row(
@@ -125,41 +121,54 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       backgroundColor: Colors.transparent,
     );
+    final txList = Container(
+      height: (mediaQuery.size.height -
+              appBar.preferredSize.height -
+              mediaQuery.padding.top) *
+          0.7, //height of appBar gets deducted from the transaction list (i. e Full height - appBar height)
+      child: TxnList(_userTransactions, _deleteTransaction),
+    );
+
     return Scaffold(
       appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text('Show Chart'),
-                Switch(
-                  value: _showChart,
-                  onChanged: (val) {
-                    setState(() {
-                      _showChart = val;
-                    });
-                  },
-                ),
-              ],
-            ),
-            _showChart
-                ? Container(
-                    height: (MediaQuery.of(context).size.height -
-                            appBar.preferredSize.height -
-                            MediaQuery.of(context).padding.top) *
-                        0.7, //height of appBar gets deducted from the transaction list (i. e Full height - appBar height)
-                    child: Chart(_recentTransactions),
-                  )
-                : Container(
-                    height: (MediaQuery.of(context).size.height -
-                            appBar.preferredSize.height -
-                            MediaQuery.of(context).padding.top) *
-                        0.7, //height of appBar gets deducted from the transaction list (i. e Full height - appBar height)
-                    child: TxnList(_userTransactions, _deleteTransaction),
+            if (isLandscape)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text('Show Chart'),
+                  Switch(
+                    value: _showChart,
+                    onChanged: (val) {
+                      setState(() {
+                        _showChart = val;
+                      });
+                    },
                   ),
+                ],
+              ),
+            if (!isLandscape)
+              Container(
+                height: (mediaQuery.size.height -
+                        appBar.preferredSize.height -
+                        mediaQuery.padding.top) *
+                    0.3, //height of appBar gets deducted from the transaction list (i. e Full height - appBar height)
+                child: Chart(_recentTransactions),
+              ),
+            if (!isLandscape) txList,
+            if (isLandscape)
+              _showChart
+                  ? Container(
+                      height: (mediaQuery.size.height -
+                              appBar.preferredSize.height -
+                              mediaQuery.padding.top) *
+                          0.7, //height of appBar gets deducted from the transaction list (i. e Full height - appBar height)
+                      child: Chart(_recentTransactions),
+                    )
+                  : txList
           ],
         ),
       ),
