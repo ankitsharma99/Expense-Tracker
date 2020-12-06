@@ -1,11 +1,19 @@
 import 'dart:ui';
+//import 'package:flutter/services.dart';
 import './widgets/chart.dart';
 import 'package:flutter/material.dart';
 import './widgets/txn_list.dart';
 import './widgets/new_txn.dart';
 import './models/txns.dart';
 
-void main() => runApp(ExpenseApp());
+void main() {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // SystemChrome.setPreferredOrientations([
+  //   DeviceOrientation.portraitUp,
+  //   DeviceOrientation.portraitDown,
+  // ]);
+  runApp(ExpenseApp());
+}
 
 class ExpenseApp extends StatelessWidget {
   @override
@@ -57,6 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }).toList();
   }
 
+  bool _showChart = false;
   void _addNewTransaction(
       String txTitle, double txAmount, DateTime chosenDate) {
     final newTx = Txn(
@@ -94,39 +103,68 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0.0,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  'Expense',
-                  style: TextStyle(fontFamily: 'Open Sans'),
-                ),
-                Text(
-                  ' Tracker',
-                  style: TextStyle(
-                      fontFamily: 'Open Sans', fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ],
-        ),
-        backgroundColor: Colors.transparent,
+    final appBar = AppBar(
+      elevation: 0.0,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Expense',
+                style: TextStyle(fontFamily: 'Open Sans'),
+              ),
+              Text(
+                ' Tracker',
+                style: TextStyle(
+                    fontFamily: 'Open Sans', fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ],
       ),
+      backgroundColor: Colors.transparent,
+    );
+    return Scaffold(
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Chart(_recentTransactions),
-            TxnList(_userTransactions, _deleteTransaction),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text('Show Chart'),
+                Switch(
+                  value: _showChart,
+                  onChanged: (val) {
+                    setState(() {
+                      _showChart = val;
+                    });
+                  },
+                ),
+              ],
+            ),
+            _showChart
+                ? Container(
+                    height: (MediaQuery.of(context).size.height -
+                            appBar.preferredSize.height -
+                            MediaQuery.of(context).padding.top) *
+                        0.7, //height of appBar gets deducted from the transaction list (i. e Full height - appBar height)
+                    child: Chart(_recentTransactions),
+                  )
+                : Container(
+                    height: (MediaQuery.of(context).size.height -
+                            appBar.preferredSize.height -
+                            MediaQuery.of(context).padding.top) *
+                        0.7, //height of appBar gets deducted from the transaction list (i. e Full height - appBar height)
+                    child: TxnList(_userTransactions, _deleteTransaction),
+                  ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        hoverColor: Colors.black38,
         child: Icon(Icons.add),
         onPressed: () => _startAddNewTransaction(context),
         backgroundColor: Colors.white,
